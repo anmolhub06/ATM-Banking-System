@@ -1,0 +1,149 @@
+const MAX_ACCOUNTS = 10;
+const MAX_HISTORY = 20;
+
+// Structure to represent an account
+class Account {
+    constructor() {
+        this.accountNumber = 0;
+        this.name = '';
+        this.balance = 0.0;
+        this.pin = '';
+        this.history = [];
+        this.historyCount = 0;
+    }
+}
+
+const accounts = new Array(MAX_ACCOUNTS);
+let accountCount = 0;
+let currentAccountIndex = -1;
+
+function displayBalance(account) {
+    console.log(Account Number: ${account.accountNumber});
+    console.log(Name: ${account.name});
+    console.log(Your account balance is: $${account.balance.toFixed(2)});
+}
+
+function deposit(account) {
+    const amount = parseFloat(prompt('Enter the amount to deposit: $'));
+
+    if (!isNaN(amount) && amount > 0) {
+        account.balance += amount;
+        console.log(Deposit successful. Your new balance is: $${account.balance.toFixed(2)});
+        account.history[account.historyCount] = Deposited $${amount.toFixed(2)};
+        account.historyCount++;
+    } else {
+        console.log('Invalid amount. Please enter a positive amount.');
+    }
+}
+
+function withdraw(account) {
+    const amount = parseFloat(prompt('Enter the amount to withdraw: $'));
+
+    if (!isNaN(amount) && amount > 0) {
+        if (amount <= account.balance) {
+            account.balance -= amount;
+            console.log(Withdrawal successful. Your new balance is: $${account.balance.toFixed(2)});
+            account.history[account.historyCount] = Withdrawn $${amount.toFixed(2)};
+            account.historyCount++;
+        } else {
+            console.log(Insufficient balance. Your balance is: $${account.balance.toFixed(2)});
+        }
+    } else {
+        console.log('Invalid amount. Please enter a positive amount.');
+    }
+}
+
+function showHistory(account) {
+    console.log(Transaction History for Account Number ${account.accountNumber}:);
+    for (let i = 0; i < account.historyCount; i++) {
+        console.log(${i + 1}. ${account.history[i]});
+    }
+}
+
+function createAccount() {
+    if (accountCount < MAX_ACCOUNTS) {
+        const newAccount = new Account();
+        newAccount.accountNumber = accountCount + 1;
+        newAccount.name = prompt('Enter your name:');
+        newAccount.pin = prompt('Enter a 4-digit PIN for your account:');
+        newAccount.balance = 0.0;
+        newAccount.historyCount = 0;
+        accounts[accountCount] = newAccount;
+        console.log(Account created successfully. Your account number is: ${newAccount.accountNumber});
+        accountCount++;
+    } else {
+        console.log('Maximum number of accounts reached. Cannot create more accounts.');
+    }
+}
+
+function authenticateAccount() {
+    const accountNumber = parseInt(prompt('Enter your account number:'));
+    const pin = prompt('Enter your 4-digit PIN:');
+
+    for (let i = 0; i < accountCount; i++) {
+        if (accounts[i].accountNumber === accountNumber && accounts[i].pin === pin) {
+            currentAccountIndex = i;
+            return true; // Authentication successful
+        }
+    }
+    return false; // Authentication failed
+}
+
+while (true) {
+    if (currentAccountIndex === -1) {
+        console.log('\nWelcome to the ATM');
+        console.log('1. Create Account');
+        console.log('2. Login');
+        console.log('3. Exit');
+    } else {
+        console.log('\nATM Menu:');
+        console.log('1. Check Balance');
+        console.log('2. Deposit');
+        console.log('3. Withdraw');
+        console.log('4. View Transaction History');
+        console.log('5. Logout');
+    }
+
+    const choice = parseInt(prompt('Enter your choice:'));
+
+    if (currentAccountIndex === -1) {
+        switch (choice) {
+            case 1:
+                createAccount();
+                break;
+            case 2:
+                if (authenticateAccount()) {
+                    console.log('Login successful.');
+                } else {
+                    console.log('Login failed. Please check your account number and PIN.');
+                }
+                break;
+            case 3:
+                console.log('Thank you for using this ATM. Goodbye!');
+                process.exit(0);
+            default:
+                console.log('Invalid choice. Please select a valid option.');
+        }
+    } else {
+        switch (choice) {
+            case 1:
+                displayBalance(accounts[currentAccountIndex]);
+                break;
+            case 2:
+                deposit(accounts[currentAccountIndex]);
+                break;
+            case 3:
+                withdraw(accounts[currentAccountIndex]);
+                break;
+            case 4:
+                showHistory(accounts[currentAccountIndex]);
+                break;
+            case 5:
+                console.log('Logout successful. Thank you for using this ATM. Goodbye!');
+                currentAccountIndex = -1;
+                break;
+            default:
+                console.log('Invalid choice. Please select a valid option.');
+        }
+    }
+}
